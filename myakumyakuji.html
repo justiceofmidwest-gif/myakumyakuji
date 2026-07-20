@@ -328,10 +328,42 @@ function shareX() {
   window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, "_blank", "noopener,noreferrer");
 }
 
-function shareFacebook() {
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    // clipboard API が使えない環境向けフォールバック
+    const temp = document.createElement("textarea");
+    temp.value = text;
+    temp.style.position = "fixed";
+    temp.style.opacity = "0";
+    document.body.appendChild(temp);
+    temp.select();
+    let ok = false;
+    try {
+      document.execCommand("copy");
+      ok = true;
+    } catch (e2) {
+      ok = false;
+    }
+    document.body.removeChild(temp);
+    return ok;
+  }
+}
+
+// Facebookのシェアダイアログは quote パラメータをほとんど反映しないため、
+// 結果テキストを先にコピーしてから開き、貼り付けてもらう形にする
+async function shareFacebook() {
   const url = encodeURIComponent(location.href);
   const quote = encodeURIComponent(getResultText());
+  const toast = document.getElementById("copyToast");
+  const copied = await copyText(getResultText());
+  toast.innerText = copied
+    ? "結果をコピーしました。Facebookの投稿欄に貼り付けてください！"
+    : "Facebookの投稿画面が開きます。";
   window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${quote}`, "_blank", "noopener,noreferrer");
+  setTimeout(() => { toast.innerText = ""; }, 4000);
 }
 
 function shareLINE() {
@@ -342,25 +374,8 @@ function shareLINE() {
 
 async function copyLink() {
   const toast = document.getElementById("copyToast");
-  try {
-    await navigator.clipboard.writeText(location.href);
-    toast.innerText = "リンクをコピーしました！";
-  } catch (e) {
-    // clipboard API が使えない環境向けフォールバック
-    const temp = document.createElement("textarea");
-    temp.value = location.href;
-    temp.style.position = "fixed";
-    temp.style.opacity = "0";
-    document.body.appendChild(temp);
-    temp.select();
-    try {
-      document.execCommand("copy");
-      toast.innerText = "リンクをコピーしました！";
-    } catch (e2) {
-      toast.innerText = "コピーに失敗しました。URLを手動でコピーしてください。";
-    }
-    document.body.removeChild(temp);
-  }
+  const copied = await copyText(location.href);
+  toast.innerText = copied ? "リンクをコピーしました！" : "コピーに失敗しました。URLを手動でコピーしてください。";
   setTimeout(() => { toast.innerText = ""; }, 2500);
 }
 
