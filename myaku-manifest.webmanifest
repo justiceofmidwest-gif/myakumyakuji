@@ -1,0 +1,13 @@
+{
+  "name": "みゃくみゃくじ 31",
+  "short_name": "みゃくみゃくじ",
+  "description": "31の「脈」から、今日のあなたに流れている運をひとつ授けるWebおみくじ。",
+  "start_url": "./myakumyakuji.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#E6002D",
+  "icons": [
+    { "src": "myaku-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "myaku-icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
