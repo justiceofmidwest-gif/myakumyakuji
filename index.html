@@ -156,10 +156,39 @@ button:disabled {
   font-size: 12px;
   font-weight: bold;
   color: #fff;
-  background: linear-gradient(90deg, var(--myaku-red), var(--myaku-blue));
+  background: linear-gradient(90deg, var(--myaku-red), gold, var(--myaku-blue), var(--myaku-red));
+  background-size: 300% 100%;
+  animation: rare-label-shine 2.5s linear infinite;
   padding: 3px 12px;
   border-radius: 999px;
   margin-bottom: 10px;
+}
+
+@keyframes rare-label-shine {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  will-change: transform, opacity;
+  animation-name: confetti-fall;
+  animation-timing-function: cubic-bezier(0.4, 0.1, 0.6, 1);
+  animation-fill-mode: forwards;
+}
+
+@keyframes confetti-fall {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--drift), 115vh) rotate(var(--spin)); opacity: 0.4; }
 }
 
 .name {
@@ -313,8 +342,43 @@ function show(r) {
   card.classList.toggle("rare", !!r.rare);
   document.getElementById("rareLabel").style.display = r.rare ? "inline-block" : "none";
 
+  if (r.rare) launchConfetti();
+
   document.getElementById("drawBtn").disabled = false;
   enableShareButtons(true);
+}
+
+function launchConfetti() {
+  const container = document.getElementById("confetti");
+  container.innerHTML = "";
+  const colors = [
+    "#FFD700", "#FFC800", "#FFF3B0",             // gold
+    "#E8E8E8", "#C0C0C0", "#FFFFFF",             // silver
+    "#FF4D6D", "#FF9F1C", "#FFE156", "#6BCB77", "#4D96FF", "#B983FF" // rainbow
+  ];
+  const pieceCount = 150;
+
+  for (let i = 0; i < pieceCount; i++) {
+    const piece = document.createElement("div");
+    piece.className = "confetti-piece";
+    const isCircle = Math.random() < 0.4;
+    const size = 6 + Math.random() * 9;
+    piece.style.width = size + "px";
+    piece.style.height = (isCircle ? size : size * 1.7) + "px";
+    piece.style.borderRadius = isCircle ? "50%" : "2px";
+    piece.style.left = Math.random() * 100 + "vw";
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.setProperty("--drift", (Math.random() * 180 - 90) + "px");
+    piece.style.setProperty("--spin", (Math.random() * 720 - 360) + "deg");
+    if (Math.random() < 0.35) {
+      piece.style.boxShadow = "0 0 6px 1px rgba(255,255,255,0.85)";
+    }
+    const duration = 2.6 + Math.random() * 2;
+    piece.style.animationDuration = duration + "s";
+    piece.style.animationDelay = (Math.random() * 0.7) + "s";
+    container.appendChild(piece);
+    setTimeout(() => piece.remove(), (duration + 1) * 1000);
+  }
 }
 
 function getResultText() {
@@ -398,6 +462,8 @@ document.addEventListener("DOMContentLoaded", () => {
 </head>
 
 <body>
+
+<div id="confetti" class="confetti-container" aria-hidden="true"></div>
 
 <h1>みゃくみゃくじ 31</h1>
 <div class="badge">全31種・激レア「脈々」出現率 約1%</div>
